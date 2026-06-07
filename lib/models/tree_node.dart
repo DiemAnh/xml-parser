@@ -1,24 +1,39 @@
+import 'dart:collection';
+
 import 'package:xml_app/models/attribute.dart';
 
-class TreeNode {
+base class TreeNode extends LinkedListEntry<TreeNode> {
   String tagName;
 
-  List<Attribute> attributes;
+  LinkedList<Attribute> attributes;
 
   String? text;
 
   TreeNode? parent;
 
-  List<TreeNode> children;
+  LinkedList<TreeNode> children;
 
   TreeNode({
     required this.tagName,
     this.text,
     this.parent,
-    List<Attribute>? attributes,
-    List<TreeNode>? children,
-  })  : attributes = attributes ?? [],
-        children = children ?? [];
+    Iterable<Attribute>? attributes,
+    Iterable<TreeNode>? children,
+  })  : attributes = LinkedList<Attribute>(),
+        children = LinkedList<TreeNode>() {
+    if (attributes != null) {
+      for (final a in attributes) {
+        this.attributes.add(a);
+      }
+    }
+
+    if (children != null) {
+      for (final c in children) {
+        c.parent = this;
+        this.children.add(c);
+      }
+    }
+  }
 
   void addChild(TreeNode child) {
     child.parent = this;

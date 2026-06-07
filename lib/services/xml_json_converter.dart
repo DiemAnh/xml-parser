@@ -23,12 +23,12 @@ class XmlJsonConverter {
       return element.innerText.trim();
     }
 
-    Map<String, dynamic> result = {};
+    var result = {};
 
     for (final child
-        in element.children.whereType<XmlElement>()) {
+      in element.children.whereType<XmlElement>()) {
       result[child.name.local] =
-          _xmlElementToMap(child);
+        _xmlElementToMap(child);
     }
 
     return result;
@@ -37,8 +37,7 @@ class XmlJsonConverter {
   //  JSON -> XML
  
   static String jsonToXml(String jsonString) {
-    final Map<String, dynamic> map =
-        jsonDecode(jsonString);
+    final dynamic map = jsonDecode(jsonString);
 
     final builder = XmlBuilder();
 
@@ -59,7 +58,7 @@ class XmlJsonConverter {
     builder.element(
       key,
       nest: () {
-        if (value is Map<String, dynamic>) {
+        if (value is Map) {
           value.forEach((k, v) {
             _buildXml(builder, k, v);
           });

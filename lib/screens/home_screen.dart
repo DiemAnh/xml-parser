@@ -23,7 +23,7 @@ class _HomeScreenState
   final TextEditingController searchController =
       TextEditingController();
 
-  List<TreeNode> searchResult = [];
+  Iterable<TreeNode> searchResult = const Iterable.empty();
 
   final String sampleXml = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -119,18 +119,17 @@ class _HomeScreenState
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
-      children: searchResult
-          .map(
-            (e) => Card(
-              child: ListTile(
-                title: Text(e.tagName),
-                subtitle: Text(
-                  e.text ?? "",
-                ),
+      children: [
+        for (final e in searchResult)
+          Card(
+            child: ListTile(
+              title: Text(e.tagName),
+              subtitle: Text(
+                e.text ?? "",
               ),
             ),
-          )
-          .toList(),
+          ),
+      ],
     );
   }
 
