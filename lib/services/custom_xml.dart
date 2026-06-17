@@ -58,11 +58,11 @@ class CustomXmlDocument {
       sb.write('>');
       if (pretty && (e.children.isNotEmpty)) sb.writeln();
       if (e.text != null && e.text!.isNotEmpty) {
-        final t = pretty ? '${ind}  ${e.text}' : e.text;
+        final t = pretty ? '$ind  ${e.text}' : e.text;
         if (pretty && e.children.isEmpty) {
           sb.write(t);
         } else if (pretty && e.children.isNotEmpty) {
-          sb.write('${ind}  ${e.text}\n');
+          sb.write('$ind  ${e.text}\n');
         } else {
           sb.write(t);
         }
@@ -195,7 +195,12 @@ class _CustomXmlParser {
         _i += 2; // skip </
         final endName = _readName();
         _skipWhitespace();
-        if (_i < _s.length && _s[_i] == '>') _i++;
+        if (endName != elem.name.local) {
+          // mismatched end tag - continue but consume
+        }
+        if (_i < _s.length && _s[_i] == '>') {
+          _i++;
+        }
         return elem;
       } else if (_startsWith('<')) {
         final child = _parseElement();
@@ -241,7 +246,9 @@ class _CustomXmlParser {
       return val;
     }
     final start = _i;
-    while (_i < _s.length && !_s[_i].trim().isEmpty && _s[_i] != '>') _i++;
+    while (_i < _s.length && _s[_i].trim().isNotEmpty && _s[_i] != '>') {
+      _i++;
+    }
     return _s.substring(start, _i);
   }
 }
