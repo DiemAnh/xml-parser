@@ -1,3 +1,4 @@
+// Custom map implementation using a singly-linked list of entries.
 
 class _Entry<K, V> {
   K key;
@@ -6,11 +7,11 @@ class _Entry<K, V> {
   _Entry(this.key, this.value);
 }
 
-class SimpleMap<K, V> {
+class CustomMap<K, V> {
   _Entry<K, V>? _head;
   int _length = 0;
 
-  SimpleMap();
+  CustomMap();
 
   int get length => _length;
   bool get isEmpty => _length == 0;

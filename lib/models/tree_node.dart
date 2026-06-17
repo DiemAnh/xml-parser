@@ -1,25 +1,25 @@
 import 'package:xml_app/models/attribute.dart';
-import 'package:xml_app/collections/simple_list.dart';
+import 'package:xml_app/collections/custom_list.dart';
 
 class TreeNode {
   String tagName;
 
-  SimpleList<Attribute> attributes;
+  CustomList<Attribute> attributes;
 
   String? text;
 
   TreeNode? parent;
 
-  SimpleList<TreeNode> children;
+  CustomList<TreeNode> children;
 
   TreeNode({
     required this.tagName,
     this.text,
     this.parent,
-    SimpleList<Attribute>? attributes,
-    SimpleList<TreeNode>? children,
-  })  : attributes = attributes ?? SimpleList<Attribute>(),
-        children = children ?? SimpleList<TreeNode>();
+    CustomList<Attribute>? attributes,
+    CustomList<TreeNode>? children,
+  })  : attributes = attributes ?? CustomList<Attribute>(),
+        children = children ?? CustomList<TreeNode>();
 
   void addChild(TreeNode child) {
     child.parent = this;

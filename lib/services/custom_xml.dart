@@ -1,26 +1,27 @@
-import 'package:xml_app/collections/simple_list.dart';
+// Minimal custom XML parser and builder replacement for package:xml
+// Supports elements, attributes, text, and self-closing tags.
 
-class XmlName {
+class CustomXmlName {
   final String local;
-  XmlName(this.local);
+  CustomXmlName(this.local);
 }
 
-class XmlAttribute {
-  final XmlName name;
+class CustomXmlAttribute {
+  final CustomXmlName name;
   final String value;
-  XmlAttribute({required this.name, required this.value});
+  CustomXmlAttribute({required this.name, required this.value});
 }
 
-class XmlElement {
-  final XmlName name;
-  final SimpleList<XmlAttribute> attributes = SimpleList<XmlAttribute>();
-  final SimpleList<XmlElement> children = SimpleList<XmlElement>();
+class CustomXmlElement {
+  final CustomXmlName name;
+  final List<CustomXmlAttribute> attributes = [];
+  final List<CustomXmlElement> children = [];
   String? text;
-  XmlElement? parent;
+  CustomXmlElement? parent;
 
-  XmlElement(this.name);
+  CustomXmlElement(this.name);
 
-  Iterable<XmlElement> get childrenElements => children;
+  Iterable<CustomXmlElement> get childrenElements => children;
 
   String get innerText {
     if (children.isEmpty) return text?.trim() ?? '';
@@ -32,18 +33,18 @@ class XmlElement {
   }
 }
 
-class XmlDocument {
-  final XmlElement rootElement;
-  XmlDocument(this.rootElement);
+class CustomXmlDocument {
+  final CustomXmlElement rootElement;
+  CustomXmlDocument(this.rootElement);
 
-  static XmlDocument parse(String input) {
-    final parser = _SimpleXmlParser(input);
-    return XmlDocument(parser.parse());
+  static CustomXmlDocument parse(String input) {
+    final parser = _CustomXmlParser(input);
+    return CustomXmlDocument(parser.parse());
   }
 
   String toXmlString({bool pretty = false}) {
     final sb = StringBuffer();
-    void emit(XmlElement e, int indent) {
+    void emit(CustomXmlElement e, int indent) {
       final ind = pretty ? '  ' * indent : '';
       sb.write('$ind<${e.name.local}');
       for (final a in e.attributes) {
@@ -57,11 +58,11 @@ class XmlDocument {
       sb.write('>');
       if (pretty && (e.children.isNotEmpty)) sb.writeln();
       if (e.text != null && e.text!.isNotEmpty) {
-        final t = pretty ? ind + '  ' + e.text! : e.text;
+        final t = pretty ? '${ind}  ${e.text}' : e.text;
         if (pretty && e.children.isEmpty) {
           sb.write(t);
         } else if (pretty && e.children.isNotEmpty) {
-          sb.write(ind + '  ' + e.text! + '\n');
+          sb.write('${ind}  ${e.text}\n');
         } else {
           sb.write(t);
         }
@@ -79,16 +80,16 @@ class XmlDocument {
   }
 }
 
-class XmlBuilder {
-  final XmlElement _root = XmlElement(XmlName('root'));
-  final SimpleList<XmlElement> _stack = SimpleList<XmlElement>();
+class CustomXmlBuilder {
+  final CustomXmlElement _root = CustomXmlElement(CustomXmlName('root'));
+  final List<CustomXmlElement> _stack = [];
 
-  XmlBuilder() {
+  CustomXmlBuilder() {
     _stack.add(_root);
   }
 
   void element(String name, {void Function()? nest}) {
-    final elem = XmlElement(XmlName(name));
+    final elem = CustomXmlElement(CustomXmlName(name));
     final parent = _stack.last;
     elem.parent = parent;
     parent.children.add(elem);
@@ -104,18 +105,18 @@ class XmlBuilder {
     cur.text = (cur.text ?? '') + t;
   }
 
-  XmlDocument buildDocument() {
+  CustomXmlDocument buildDocument() {
     if (_root.children.isEmpty) throw StateError('No root element built');
-    return XmlDocument(_root.children.first);
+    return CustomXmlDocument(_root.children.first);
   }
 }
 
 String _escape(String s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
-class _SimpleXmlParser {
+class _CustomXmlParser {
   final String _s;
   int _i = 0;
-  _SimpleXmlParser(this._s);
+  _CustomXmlParser(this._s);
 
   bool _startsWith(String pat) => _s.startsWith(pat, _i);
 
@@ -125,7 +126,7 @@ class _SimpleXmlParser {
     }
   }
 
-  XmlElement parse() {
+  CustomXmlElement parse() {
     _skipPrologAndComments();
     _skipWhitespace();
     final root = _parseElement();
@@ -136,13 +137,18 @@ class _SimpleXmlParser {
     while (true) {
       _skipWhitespace();
       if (_startsWith('<?')) {
-        // skip until ?>
         final idx = _s.indexOf('?>', _i);
-        if (idx == -1) { _i = _s.length; return; }
+        if (idx == -1) {
+          _i = _s.length;
+          return;
+        }
         _i = idx + 2;
       } else if (_startsWith('<!--')) {
         final idx = _s.indexOf('-->', _i);
-        if (idx == -1) { _i = _s.length; return; }
+        if (idx == -1) {
+          _i = _s.length;
+          return;
+        }
         _i = idx + 3;
       } else {
         break;
@@ -150,18 +156,19 @@ class _SimpleXmlParser {
     }
   }
 
-  XmlElement _parseElement() {
+  CustomXmlElement _parseElement() {
     _skipWhitespace();
     if (_i >= _s.length || _s[_i] != '<') throw FormatException('Expected < at $_i');
     _i++; // skip '<'
-    // read name
     final name = _readName();
-    final elem = XmlElement(XmlName(name));
+    final elem = CustomXmlElement(CustomXmlName(name));
     _skipWhitespace();
-    // attributes
     while (_i < _s.length && _s[_i] != '>' && !_startsWith('/>')) {
       final c = _s[_i];
-      if (c.trim().isEmpty) { _i++; continue; }
+      if (c.trim().isEmpty) {
+        _i++;
+        continue;
+      }
       if (_s[_i] == '/') break;
       final attrName = _readName();
       _skipWhitespace();
@@ -169,11 +176,10 @@ class _SimpleXmlParser {
         _i++;
         _skipWhitespace();
         final val = _readAttributeValue();
-        elem.attributes.add(XmlAttribute(name: XmlName(attrName), value: val));
+        elem.attributes.add(CustomXmlAttribute(name: CustomXmlName(attrName), value: val));
       }
       _skipWhitespace();
     }
-    // self-closing
     if (_startsWith('/>')) {
       _i += 2;
       return elem;
@@ -181,7 +187,6 @@ class _SimpleXmlParser {
     if (_i < _s.length && _s[_i] == '>') {
       _i++;
     }
-    // content: text or children
     final buffer = StringBuffer();
     while (true) {
       _skipWhitespace();
@@ -190,20 +195,13 @@ class _SimpleXmlParser {
         _i += 2; // skip </
         final endName = _readName();
         _skipWhitespace();
-        if (_i < _s.length && _s[_i] == '>') {
-          _i++;
-        }
-        if (endName != name) {
-          // mismatched end tag - continue anyway
-        }
+        if (_i < _s.length && _s[_i] == '>') _i++;
         return elem;
       } else if (_startsWith('<')) {
-        // child element
         final child = _parseElement();
         child.parent = elem;
         elem.children.add(child);
       } else {
-        // text
         final idx = _s.indexOf('<', _i);
         if (idx == -1) {
           buffer.write(_s.substring(_i));
@@ -242,11 +240,8 @@ class _SimpleXmlParser {
       _i = idx + 1;
       return val;
     }
-    // unquoted
     final start = _i;
-    while (_i < _s.length && !_s[_i].trim().isEmpty && _s[_i] != '>') {
-      _i++;
-    }
+    while (_i < _s.length && !_s[_i].trim().isEmpty && _s[_i] != '>') _i++;
     return _s.substring(start, _i);
   }
 }

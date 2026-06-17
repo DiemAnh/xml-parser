@@ -1,3 +1,4 @@
+// Custom singly-linked list implementation without using built-in List
 
 class _Node<T> {
   T value;
@@ -5,11 +6,11 @@ class _Node<T> {
   _Node(this.value);
 }
 
-class SimpleList<T> extends Iterable<T> {
+class CustomList<T> extends Iterable<T> {
   _Node<T>? _head;
   int _length = 0;
 
-  SimpleList();
+  CustomList();
 
   @override
   int get length => _length;
@@ -38,34 +39,6 @@ class SimpleList<T> extends Iterable<T> {
     for (final v in items) {
       add(v);
     }
-  }
-
-  @override
-  T get last {
-    if (_head == null) throw StateError('No elements');
-    var cur = _head;
-    while (cur!.next != null) {
-      cur = cur.next;
-    }
-    return cur.value;
-  }
-
-  T removeLast() {
-    if (_head == null) throw StateError('No elements');
-    if (_head!.next == null) {
-      final v = _head!.value;
-      _head = null;
-      _length = 0;
-      return v;
-    }
-    var cur = _head;
-    while (cur!.next!.next != null) {
-      cur = cur.next;
-    }
-    final removed = cur.next;
-    cur.next = null;
-    _length--;
-    return removed!.value;
   }
 
   void insert(int index, T value) {
@@ -165,14 +138,14 @@ class SimpleList<T> extends Iterable<T> {
   }
 
   @override
-  Iterator<T> get iterator => _SimpleListIterator<T>(_head);
+  Iterator<T> get iterator => _CustomListIterator<T>(_head);
 }
 
-class _SimpleListIterator<T> implements Iterator<T> {
+class _CustomListIterator<T> implements Iterator<T> {
   _Node<T>? _currentNode;
   _Node<T>? _nextNode;
 
-  _SimpleListIterator(_Node<T>? head) {
+  _CustomListIterator(_Node<T>? head) {
     _nextNode = head;
   }
 

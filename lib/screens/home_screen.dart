@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/tree_node.dart';
-import '../collections/simple_list.dart';
+import '../collections/custom_list.dart';
 
 import '../services/xml_parser_service.dart';
 import '../services/xml_json_converter.dart';
@@ -24,7 +24,7 @@ class _HomeScreenState
   final TextEditingController searchController =
       TextEditingController();
 
-  SimpleList<TreeNode> searchResult = SimpleList<TreeNode>();
+  CustomList<TreeNode> searchResult = CustomList<TreeNode>();
 
   final String sampleXml = '''
 <?xml version="1.0" encoding="UTF-8"?>

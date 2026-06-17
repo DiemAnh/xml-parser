@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:xml_app/collections/simple_map.dart';
-import 'package:xml_app/services/simple_xml.dart';
+import 'package:xml_app/collections/custom_map.dart';
+import 'package:xml_app/services/custom_xml.dart';
 
 class XmlJsonConverter {
   //   XML -> JSON
  
   static String xmlToJson(String xmlString) {
-    final document = XmlDocument.parse(xmlString);
+    final document = CustomXmlDocument.parse(xmlString);
 
     final root = document.rootElement;
 
@@ -18,14 +18,14 @@ class XmlJsonConverter {
     return const JsonEncoder.withIndent('  ').convert(native);
   }
 
-  static dynamic _xmlElementToMap(XmlElement element) {
-    if (element.children.whereType<XmlElement>().isEmpty) {
+  static dynamic _xmlElementToMap(CustomXmlElement element) {
+    if (element.children.isEmpty) {
       return element.innerText.trim();
     }
 
-    final SimpleMap<String, dynamic> result = SimpleMap<String, dynamic>();
+    final CustomMap<String, dynamic> result = CustomMap<String, dynamic>();
 
-    for (final child in element.children.whereType<XmlElement>()) {
+    for (final child in element.children) {
       result[child.name.local] = _xmlElementToMap(child);
     }
 
@@ -37,9 +37,9 @@ class XmlJsonConverter {
   static String jsonToXml(String jsonString) {
     final dynamic decoded = jsonDecode(jsonString);
 
-    final SimpleMap<String, dynamic> map = _toSimpleMap(decoded);
+    final CustomMap<String, dynamic> map = _toCustomMap(decoded);
 
-    final builder = XmlBuilder();
+    final builder = CustomXmlBuilder();
 
     final rootKey = map.keys.first;
 
@@ -51,14 +51,14 @@ class XmlJsonConverter {
   }
 
   static void _buildXml(
-    XmlBuilder builder,
+    CustomXmlBuilder builder,
     String key,
     dynamic value,
   ) {
     builder.element(
       key,
       nest: () {
-        if (value is SimpleMap<String, dynamic>) {
+        if (value is CustomMap<String, dynamic>) {
           value.forEach((k, v) {
             _buildXml(builder, k, v);
           });
@@ -70,7 +70,7 @@ class XmlJsonConverter {
   }
 
   static dynamic _toNativeMap(dynamic v) {
-    if (v is SimpleMap) {
+    if (v is CustomMap) {
       final Map<String, dynamic> m = {};
       for (final k in v.keys) {
         m[k] = _toNativeMap(v[k]);
@@ -79,13 +79,12 @@ class XmlJsonConverter {
     }
     return v;
   }
-
-  static SimpleMap<String, dynamic> _toSimpleMap(dynamic decoded) {
-    final SimpleMap<String, dynamic> map = SimpleMap<String, dynamic>();
+  static CustomMap<String, dynamic> _toCustomMap(dynamic decoded) {
+    final CustomMap<String, dynamic> map = CustomMap<String, dynamic>();
     if (decoded is Map) {
       decoded.forEach((k, v) {
         if (v is Map) {
-          map[k] = _toSimpleMap(v);
+          map[k] = _toCustomMap(v);
         } else {
           map[k] = v;
         }

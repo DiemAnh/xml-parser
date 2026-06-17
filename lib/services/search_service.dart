@@ -1,12 +1,12 @@
 import '../models/tree_node.dart';
-import '../collections/simple_list.dart';
+import '../collections/custom_list.dart';
 
 class SearchService {
-  static SimpleList<TreeNode> searchByTag(
+  static CustomList<TreeNode> searchByTag(
     TreeNode root,
     String tag,
   ) {
-    SimpleList<TreeNode> result = SimpleList<TreeNode>();
+    CustomList<TreeNode> result = CustomList<TreeNode>();
 
     if (root.tagName == tag) {
       result.add(root);
@@ -19,11 +19,11 @@ class SearchService {
     return result;
   }
 
-  static SimpleList<TreeNode> searchByText(
+  static CustomList<TreeNode> searchByText(
     TreeNode root,
     String text,
   ) {
-    SimpleList<TreeNode> result = SimpleList<TreeNode>();
+    CustomList<TreeNode> result = CustomList<TreeNode>();
 
     if (root.text != null &&
         root.text!
