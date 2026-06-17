@@ -1,4 +1,4 @@
-import 'package:xml/xml.dart';
+import 'package:xml_app/services/simple_xml.dart';
 
 import '../models/tree_node.dart';
 import '../models/attribute.dart';

@@ -1,6 +1,4 @@
-import 'dart:collection';
-
-base class Attribute extends LinkedListEntry<Attribute> {
+class Attribute {
   String name;
   String value;
 

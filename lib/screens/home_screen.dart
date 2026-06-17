@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/tree_node.dart';
+import '../collections/simple_list.dart';
 
 import '../services/xml_parser_service.dart';
 import '../services/xml_json_converter.dart';
@@ -23,7 +24,7 @@ class _HomeScreenState
   final TextEditingController searchController =
       TextEditingController();
 
-  Iterable<TreeNode> searchResult = const Iterable.empty();
+  SimpleList<TreeNode> searchResult = SimpleList<TreeNode>();
 
   final String sampleXml = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -119,17 +120,18 @@ class _HomeScreenState
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
-      children: [
-        for (final e in searchResult)
-          Card(
-            child: ListTile(
-              title: Text(e.tagName),
-              subtitle: Text(
-                e.text ?? "",
+      children: searchResult
+          .map(
+            (e) => Card(
+              child: ListTile(
+                title: Text(e.tagName),
+                subtitle: Text(
+                  e.text ?? "",
+                ),
               ),
             ),
-          ),
-      ],
+          )
+          .toList(),
     );
   }
 

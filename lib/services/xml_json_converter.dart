@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:xml/xml.dart';
+import 'package:xml_app/collections/simple_map.dart';
+import 'package:xml_app/services/simple_xml.dart';
 
 class XmlJsonConverter {
   //   XML -> JSON
@@ -10,12 +11,11 @@ class XmlJsonConverter {
 
     final root = document.rootElement;
 
-    final jsonMap = {
-      root.name.local: _xmlElementToMap(root),
-    };
+    final dynamic converted = _xmlElementToMap(root);
 
-    return const JsonEncoder.withIndent('  ')
-        .convert(jsonMap);
+    final native = {root.name.local: _toNativeMap(converted)};
+
+    return const JsonEncoder.withIndent('  ').convert(native);
   }
 
   static dynamic _xmlElementToMap(XmlElement element) {
@@ -23,12 +23,10 @@ class XmlJsonConverter {
       return element.innerText.trim();
     }
 
-    var result = {};
+    final SimpleMap<String, dynamic> result = SimpleMap<String, dynamic>();
 
-    for (final child
-      in element.children.whereType<XmlElement>()) {
-      result[child.name.local] =
-        _xmlElementToMap(child);
+    for (final child in element.children.whereType<XmlElement>()) {
+      result[child.name.local] = _xmlElementToMap(child);
     }
 
     return result;
@@ -37,7 +35,9 @@ class XmlJsonConverter {
   //  JSON -> XML
  
   static String jsonToXml(String jsonString) {
-    final dynamic map = jsonDecode(jsonString);
+    final dynamic decoded = jsonDecode(jsonString);
+
+    final SimpleMap<String, dynamic> map = _toSimpleMap(decoded);
 
     final builder = XmlBuilder();
 
@@ -58,7 +58,7 @@ class XmlJsonConverter {
     builder.element(
       key,
       nest: () {
-        if (value is Map) {
+        if (value is SimpleMap<String, dynamic>) {
           value.forEach((k, v) {
             _buildXml(builder, k, v);
           });
@@ -67,5 +67,30 @@ class XmlJsonConverter {
         }
       },
     );
+  }
+
+  static dynamic _toNativeMap(dynamic v) {
+    if (v is SimpleMap) {
+      final Map<String, dynamic> m = {};
+      for (final k in v.keys) {
+        m[k] = _toNativeMap(v[k]);
+      }
+      return m;
+    }
+    return v;
+  }
+
+  static SimpleMap<String, dynamic> _toSimpleMap(dynamic decoded) {
+    final SimpleMap<String, dynamic> map = SimpleMap<String, dynamic>();
+    if (decoded is Map) {
+      decoded.forEach((k, v) {
+        if (v is Map) {
+          map[k] = _toSimpleMap(v);
+        } else {
+          map[k] = v;
+        }
+      });
+    }
+    return map;
   }
 }

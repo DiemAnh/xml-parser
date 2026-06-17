@@ -1,32 +1,41 @@
 import '../models/tree_node.dart';
+import '../collections/simple_list.dart';
 
 class SearchService {
-  static Iterable<TreeNode> searchByTag(
+  static SimpleList<TreeNode> searchByTag(
     TreeNode root,
     String tag,
-  ) sync* {
+  ) {
+    SimpleList<TreeNode> result = SimpleList<TreeNode>();
+
     if (root.tagName == tag) {
-      yield root;
+      result.add(root);
     }
 
     for (final child in root.children) {
-      yield* searchByTag(child, tag);
+      result.addAll(searchByTag(child, tag));
     }
+
+    return result;
   }
 
-  static Iterable<TreeNode> searchByText(
+  static SimpleList<TreeNode> searchByText(
     TreeNode root,
     String text,
-  ) sync* {
+  ) {
+    SimpleList<TreeNode> result = SimpleList<TreeNode>();
+
     if (root.text != null &&
         root.text!
             .toLowerCase()
             .contains(text.toLowerCase())) {
-      yield root;
+      result.add(root);
     }
 
     for (final child in root.children) {
-      yield* searchByText(child, text);
+      result.addAll(searchByText(child, text));
     }
+
+    return result;
   }
 }
